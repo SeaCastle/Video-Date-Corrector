@@ -31,11 +31,11 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMOVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openMOVDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.infoDisplayTB = new System.Windows.Forms.RichTextBox();
             this.phoneNameDisplayTB = new System.Windows.Forms.RichTextBox();
             this.updateFileBtn = new System.Windows.Forms.Button();
-            this.updateDirectoryBtn = new System.Windows.Forms.Button();
+            this.PreviewChangeBtn = new System.Windows.Forms.Button();
+            this.BrowseFilesBtn = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,8 +52,7 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openMOVToolStripMenuItem,
-            this.openMOVDirectoryToolStripMenuItem});
+            this.openMOVToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -63,16 +62,9 @@
             // 
             this.openMOVToolStripMenuItem.Name = "openMOVToolStripMenuItem";
             this.openMOVToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openMOVToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.openMOVToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.openMOVToolStripMenuItem.Text = "Open MOV";
             this.openMOVToolStripMenuItem.Click += new System.EventHandler(this.openMOVToolStripMenuItem_Click);
-            // 
-            // openMOVDirectoryToolStripMenuItem
-            // 
-            this.openMOVDirectoryToolStripMenuItem.Name = "openMOVDirectoryToolStripMenuItem";
-            this.openMOVDirectoryToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.openMOVDirectoryToolStripMenuItem.Text = "Open MOV Directory";
-            this.openMOVDirectoryToolStripMenuItem.Click += new System.EventHandler(this.openMOVDirectoryToolStripMenuItem_Click);
             // 
             // infoDisplayTB
             // 
@@ -96,29 +88,41 @@
             // 
             // updateFileBtn
             // 
-            this.updateFileBtn.Location = new System.Drawing.Point(85, 411);
+            this.updateFileBtn.Location = new System.Drawing.Point(374, 411);
             this.updateFileBtn.Name = "updateFileBtn";
             this.updateFileBtn.Size = new System.Drawing.Size(117, 37);
             this.updateFileBtn.TabIndex = 3;
-            this.updateFileBtn.Text = "Update File Date";
+            this.updateFileBtn.Text = "Update File(s)";
             this.updateFileBtn.UseVisualStyleBackColor = true;
+            this.updateFileBtn.Click += new System.EventHandler(this.updateFileBtn_Click);
             // 
-            // updateDirectoryBtn
+            // PreviewChangeBtn
             // 
-            this.updateDirectoryBtn.Location = new System.Drawing.Point(344, 411);
-            this.updateDirectoryBtn.Name = "updateDirectoryBtn";
-            this.updateDirectoryBtn.Size = new System.Drawing.Size(117, 37);
-            this.updateDirectoryBtn.TabIndex = 4;
-            this.updateDirectoryBtn.Text = "Update All In Current Directory";
-            this.updateDirectoryBtn.UseVisualStyleBackColor = true;
-            this.updateDirectoryBtn.Click += new System.EventHandler(this.updateDirectoryBtn_Click);
+            this.PreviewChangeBtn.Location = new System.Drawing.Point(216, 411);
+            this.PreviewChangeBtn.Name = "PreviewChangeBtn";
+            this.PreviewChangeBtn.Size = new System.Drawing.Size(117, 37);
+            this.PreviewChangeBtn.TabIndex = 4;
+            this.PreviewChangeBtn.Text = "Preview Changes";
+            this.PreviewChangeBtn.UseVisualStyleBackColor = true;
+            this.PreviewChangeBtn.Click += new System.EventHandler(this.PreviewChangeBtn_Click);
+            // 
+            // BrowseFilesBtn
+            // 
+            this.BrowseFilesBtn.Location = new System.Drawing.Point(56, 411);
+            this.BrowseFilesBtn.Name = "BrowseFilesBtn";
+            this.BrowseFilesBtn.Size = new System.Drawing.Size(117, 37);
+            this.BrowseFilesBtn.TabIndex = 5;
+            this.BrowseFilesBtn.Text = "Browse Files";
+            this.BrowseFilesBtn.UseVisualStyleBackColor = true;
+            this.BrowseFilesBtn.Click += new System.EventHandler(this.BrowseFilesBtn_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(551, 499);
-            this.Controls.Add(this.updateDirectoryBtn);
+            this.Controls.Add(this.BrowseFilesBtn);
+            this.Controls.Add(this.PreviewChangeBtn);
             this.Controls.Add(this.updateFileBtn);
             this.Controls.Add(this.phoneNameDisplayTB);
             this.Controls.Add(this.infoDisplayTB);
@@ -138,11 +142,11 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openMOVToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openMOVDirectoryToolStripMenuItem;
         private System.Windows.Forms.RichTextBox infoDisplayTB;
         private System.Windows.Forms.RichTextBox phoneNameDisplayTB;
         private System.Windows.Forms.Button updateFileBtn;
-        private System.Windows.Forms.Button updateDirectoryBtn;
+        private System.Windows.Forms.Button PreviewChangeBtn;
+        private System.Windows.Forms.Button BrowseFilesBtn;
     }
 }
 

@@ -15,18 +15,35 @@ namespace VideoDateCorrector
     {
         private const int FILECHUNKSIZE = 2048;
         private string date;
-        private List<string> filePaths = new List<string>();
+        private List<string> filePaths;
+        private List<string> filePreviewInfo;
+        private bool shownFutureChanges;
 
         public MainForm()
         {
             InitializeComponent();
+
+            shownFutureChanges = false;
+            date = "";
+            filePaths = new List<string>();
+            filePreviewInfo = new List<string>();
         }
 
         private void openMOVToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            getFilesFromFileDialog();
+        }
+
+        private void BrowseFilesBtn_Click(object sender, EventArgs e)
+        {
+            getFilesFromFileDialog();
+        }
+
+        private void getFilesFromFileDialog()
+        {
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                dialog.Filter = "MOV files|*.mov;*.txt";                               
+                dialog.Filter = "MOV files|*.mov;*.txt";
                 dialog.Title = ".MOV Date Corrector";
                 dialog.RestoreDirectory = true;
 
@@ -39,13 +56,17 @@ namespace VideoDateCorrector
                     {
                         filePaths.Clear();
                     }
+                    if (filePreviewInfo.Count > 0)
+                    {
+                        filePreviewInfo.Clear();
+                    }
 
                     foreach (string file in dialog.FileNames)
                     {
                         try
                         {
                             filePaths.Add(file);
-                            addFileInfoToInfoTB(file);
+                            AddFileInfo(file);
                         }
                         catch (Exception ex)
                         {
@@ -54,29 +75,18 @@ namespace VideoDateCorrector
                     }
                 }
             }
-                
-        }
-
-        private void openMOVDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
-            {
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    string folderName = dialog.SelectedPath;
-
-                    infoDisplayTB.Text = "Directory Opened: " + folderName;
-                }
-            }
+            // Append all of the files file information to the InfoDisplayTB 
+            infoDisplayTB.Clear();
+            addFileInfoToInfoTB();
         }
 
         /**
          * Takes each file that was chosen from the OpenFileDialog and parses the Date/Time from the
          * file and sets the files Modified Date to the date that was parsed.
-         */ 
-        private void updateDirectoryBtn_Click(object sender, EventArgs e)
+         */
+        private void updateFileBtn_Click(object sender, EventArgs e)
         {
-            
+
             byte[] fileChunk = new byte[FILECHUNKSIZE];
             DateTime fileDate;
 
@@ -103,8 +113,7 @@ namespace VideoDateCorrector
                         infoDisplayTB.AppendText("Error parsing file. The date in the file does not match \"yyyy-MM-dd HH:mm:ss\" format");
                     }
                 }
-                
-            }                        
+            }
         }
 
         /**
@@ -112,7 +121,7 @@ namespace VideoDateCorrector
          * byte array. The size of the chunk is specified by FILECHUNKSIZE in MainForm.cs
          * @param filePath - The absolute path for the file to be opened in the FileStream.
          * @param fileChunk - Byte array that is used to hold the binary data from the file. 
-         */ 
+         */
         private void getFileChunk(string filePath, ref byte[] fileChunk)
         {           
             using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -173,7 +182,19 @@ namespace VideoDateCorrector
          * Appends a File name and Modified Date to the infoDisplayTB
          * @param filePath - The absolute file path for the file we are displaying information for.
          */ 
-        private void addFileInfoToInfoTB(string filePath)
+        private void addFileInfoToInfoTB()
+        {
+            //infoDisplayTB.AppendText("---------------------------------------------------\n");
+            //infoDisplayTB.AppendText("File: " + fileName + "\n");
+            //infoDisplayTB.AppendText("Current Modified DateTime: " + modifiedDate.ToString() + "\n");
+
+            foreach (String file in filePreviewInfo)
+            {
+                infoDisplayTB.AppendText(file);
+            }
+        }
+
+        private void AddFileInfo(string filePath)
         {
             // FOR DIRECTORIES PROBABLY. THIS IS USED IF A FILE/DIRECTORY ENDS WITH / Ex. Something/MyDocs/ WILL RETURN MyDocs
             //string fileName = file.Substring(0, file.LastIndexOf('\\')).Split('\\').Last();
@@ -181,10 +202,23 @@ namespace VideoDateCorrector
             string fileName = filePath.Split('\\').Last();
             DateTime modifiedDate = File.GetLastWriteTime(filePath);
 
-            infoDisplayTB.AppendText("---------------------------------------------------\n");
-            infoDisplayTB.AppendText("File: " + fileName + "\n");
-            infoDisplayTB.AppendText("Current Modified DateTime: " + modifiedDate.ToString() + "\n");
+            filePreviewInfo.Add("---------------------------------------------------\n"
+                + "File: " + fileName + "\n" + "Current Modified DateTime: " + modifiedDate.ToString() + "\n");
         }
+
+        private void PreviewChangeBtn_Click(object sender, EventArgs e)
+        {
+            if (filePaths.Count == 0)
+            {
+                return;
+            }
+
+            shownFutureChanges = true;
+
+
+        }
+
+        
     }
 }
 
