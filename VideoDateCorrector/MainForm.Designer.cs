@@ -80,14 +80,14 @@
             this.infoDisplayTB.Location = new System.Drawing.Point(13, 28);
             this.infoDisplayTB.Name = "infoDisplayTB";
             this.infoDisplayTB.ReadOnly = true;
-            this.infoDisplayTB.Size = new System.Drawing.Size(526, 166);
+            this.infoDisplayTB.Size = new System.Drawing.Size(526, 251);
             this.infoDisplayTB.TabIndex = 1;
             this.infoDisplayTB.Text = "";
             // 
             // phoneNameDisplayTB
             // 
             this.phoneNameDisplayTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.phoneNameDisplayTB.Location = new System.Drawing.Point(13, 219);
+            this.phoneNameDisplayTB.Location = new System.Drawing.Point(13, 299);
             this.phoneNameDisplayTB.Name = "phoneNameDisplayTB";
             this.phoneNameDisplayTB.ReadOnly = true;
             this.phoneNameDisplayTB.Size = new System.Drawing.Size(526, 46);
@@ -96,7 +96,7 @@
             // 
             // updateFileBtn
             // 
-            this.updateFileBtn.Location = new System.Drawing.Point(89, 332);
+            this.updateFileBtn.Location = new System.Drawing.Point(85, 411);
             this.updateFileBtn.Name = "updateFileBtn";
             this.updateFileBtn.Size = new System.Drawing.Size(117, 37);
             this.updateFileBtn.TabIndex = 3;
@@ -105,7 +105,7 @@
             // 
             // updateDirectoryBtn
             // 
-            this.updateDirectoryBtn.Location = new System.Drawing.Point(331, 332);
+            this.updateDirectoryBtn.Location = new System.Drawing.Point(344, 411);
             this.updateDirectoryBtn.Name = "updateDirectoryBtn";
             this.updateDirectoryBtn.Size = new System.Drawing.Size(117, 37);
             this.updateDirectoryBtn.TabIndex = 4;
@@ -117,7 +117,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(551, 407);
+            this.ClientSize = new System.Drawing.Size(551, 499);
             this.Controls.Add(this.updateDirectoryBtn);
             this.Controls.Add(this.updateFileBtn);
             this.Controls.Add(this.phoneNameDisplayTB);

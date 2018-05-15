@@ -26,21 +26,26 @@ namespace VideoDateCorrector
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                dialog.Filter = "MOV files|*.mov;*.txt";
-                dialog.InitialDirectory = @"C:\";
-                dialog.RestoreDirectory = true;
+                dialog.Filter = "MOV files|*.mov;*.txt";                               
                 dialog.Title = ".MOV Date Corrector";
+                dialog.RestoreDirectory = true;
 
                 // Allow the user to select multiple files
                 dialog.Multiselect = true;
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
+                    if (filePaths.Count > 0)
+                    {
+                        filePaths.Clear();
+                    }
+
                     foreach (string file in dialog.FileNames)
                     {
                         try
                         {
                             filePaths.Add(file);
+                            addFileInfoToInfoTB(file);
                         }
                         catch (Exception ex)
                         {
@@ -65,7 +70,10 @@ namespace VideoDateCorrector
             }
         }
 
-        
+        /**
+         * Takes each file that was chosen from the OpenFileDialog and parses the Date/Time from the
+         * file and sets the files Modified Date to the date that was parsed.
+         */ 
         private void updateDirectoryBtn_Click(object sender, EventArgs e)
         {
             
@@ -132,7 +140,6 @@ namespace VideoDateCorrector
         {
             DateTime fileDate = new DateTime();
             int count = 0; ///< This is to keep track how many times we find the word "free"
-            char[] delimiters = { 'T', '-', ':' };
 
             for (int i = fileChunk.Length - 1; i > 0; i--)
             {
@@ -160,6 +167,23 @@ namespace VideoDateCorrector
                 }
             }
             return fileDate;
+        }
+
+        /**
+         * Appends a File name and Modified Date to the infoDisplayTB
+         * @param filePath - The absolute file path for the file we are displaying information for.
+         */ 
+        private void addFileInfoToInfoTB(string filePath)
+        {
+            // FOR DIRECTORIES PROBABLY. THIS IS USED IF A FILE/DIRECTORY ENDS WITH / Ex. Something/MyDocs/ WILL RETURN MyDocs
+            //string fileName = file.Substring(0, file.LastIndexOf('\\')).Split('\\').Last();
+
+            string fileName = filePath.Split('\\').Last();
+            DateTime modifiedDate = File.GetLastWriteTime(filePath);
+
+            infoDisplayTB.AppendText("---------------------------------------------------\n");
+            infoDisplayTB.AppendText("File: " + fileName + "\n");
+            infoDisplayTB.AppendText("Current Modified DateTime: " + modifiedDate.ToString() + "\n");
         }
     }
 }
