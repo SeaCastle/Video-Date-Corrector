@@ -15,9 +15,47 @@ namespace VideoDateCorrector
     {
         private const int FILECHUNKSIZE = 2048;
         private string date;
-        private List<string> filePaths;
-        private List<string> filePreviewInfo;
+        private string directoryPath;
+        private List<FileInformation> fileInfo;
         private bool shownFutureChanges;
+
+        public class FileInformation
+        {
+            private string fileName;
+            private string filePath;
+            private DateTime currentModifiedDate;
+            private DateTime embeddedFileDate;
+
+            public string FileName
+            {
+                //get => fileName;
+                //set => fileName = value;
+                get; set;
+            }
+
+            public string FilePath
+            {
+                get; set;
+            }
+
+            public DateTime CurrentModifiedDate
+            {
+                get; set;
+            }
+
+            public DateTime EmbeddedFileDate
+            {
+                get; set;
+            }
+            
+            public FileInformation(string filePath)
+            {
+                FilePath = filePath;
+                FileName = filePath.Split('\\').Last();
+                currentModifiedDate = DateTime.MinValue;
+                embeddedFileDate = DateTime.MinValue;
+            }
+        }
 
         public MainForm()
         {
@@ -25,8 +63,8 @@ namespace VideoDateCorrector
 
             shownFutureChanges = false;
             date = "";
-            filePaths = new List<string>();
-            filePreviewInfo = new List<string>();
+            directoryPath = "";
+            fileInfo = new List<FileInformation>();
         }
 
         private void openMOVToolStripMenuItem_Click(object sender, EventArgs e)
@@ -52,21 +90,25 @@ namespace VideoDateCorrector
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    if (filePaths.Count > 0)
+                    shownFutureChanges = false;
+
+                    // Clear all previous stored fileInformation
+                    if (fileInfo.Count > 0)
                     {
-                        filePaths.Clear();
-                    }
-                    if (filePreviewInfo.Count > 0)
-                    {
-                        filePreviewInfo.Clear();
+                        fileInfo.Clear();
                     }
 
                     foreach (string file in dialog.FileNames)
                     {
+                        // This to ensure if they open a new FileDialog in the same instance of the program
+                        // we can grab a new directory if they choose a different one.
+                        if (file == dialog.FileNames[0])
+                        {
+                            directoryPath = file.Split('\\').Reverse().Take(2).Last();
+                        }
                         try
                         {
-                            filePaths.Add(file);
-                            AddFileInfo(file);
+                            fileInfo.Add(new FileInformation(file));
                         }
                         catch (Exception ex)
                         {
@@ -86,33 +128,12 @@ namespace VideoDateCorrector
          */
         private void updateFileBtn_Click(object sender, EventArgs e)
         {
+            if (fileInfo.Count <= 0)
+                return;
 
-            byte[] fileChunk = new byte[FILECHUNKSIZE];
-            DateTime fileDate;
-
-            if (filePaths.Count <= 0)
+            foreach (FileInformation file in fileInfo)
             {
-                infoDisplayTB.Text = "Please select a file (ctrl+O) or from the dropdown menu first.";
-            }
-            else
-            {
-                infoDisplayTB.Clear();
-
-                foreach (String file in filePaths)
-                {
-
-                    getFileChunk(file, ref fileChunk);
-                    fileDate = getDateFromFileChunk(ref fileChunk);
-
-                    if (fileDate != DateTime.MinValue)
-                    {
-                        File.SetLastWriteTime(file, fileDate);
-                    }
-                    else
-                    {
-                        infoDisplayTB.AppendText("Error parsing file. The date in the file does not match \"yyyy-MM-dd HH:mm:ss\" format");
-                    }
-                }
+                File.SetLastWriteTime(file.FilePath, file.EmbeddedFileDate);
             }
         }
 
@@ -178,49 +199,127 @@ namespace VideoDateCorrector
             return fileDate;
         }
 
+        private void getEmbeddedFileDate()
+        {
+            byte[] fileChunk = new byte[FILECHUNKSIZE];
+            DateTime embeddedFileDate;
+
+            foreach (FileInformation file in fileInfo)
+            {
+
+                getFileChunk(file.FilePath, ref fileChunk);
+                embeddedFileDate = getDateFromFileChunk(ref fileChunk);
+
+                if (embeddedFileDate != DateTime.MinValue)
+                {
+                    //File.SetLastWriteTime(file.FilePath, fileDate);
+                    file.EmbeddedFileDate = embeddedFileDate;
+                }
+                else
+                {
+                    infoDisplayTB.AppendText("Error parsing file. The date in the file does not match \"yyyy-MM-dd HH:mm:ss\" format");
+                }
+            }
+        }
+
+        private void getCurrentModifiedDate()
+        {
+            foreach (FileInformation file in fileInfo)
+            {
+                file.CurrentModifiedDate = File.GetLastWriteTime(file.FilePath);
+            }
+        }
+
         /**
-         * Appends a File name and Modified Date to the infoDisplayTB
-         * @param filePath - The absolute file path for the file we are displaying information for.
-         */ 
+         * Appends a File information to the FileInfo text box. File information includes:
+         * File Name, Current Modified DateTime, and if applicable - Embedded File Date.
+         */
         private void addFileInfoToInfoTB()
         {
             //infoDisplayTB.AppendText("---------------------------------------------------\n");
             //infoDisplayTB.AppendText("File: " + fileName + "\n");
             //infoDisplayTB.AppendText("Current Modified DateTime: " + modifiedDate.ToString() + "\n");
 
-            foreach (String file in filePreviewInfo)
+            foreach (FileInformation file in fileInfo)
             {
-                infoDisplayTB.AppendText(file);
+                infoDisplayTB.AppendText("---------------------------------------------------\n");
+                infoDisplayTB.AppendText("File: " + file.FileName + "\n");
+                if (file.CurrentModifiedDate != DateTime.MinValue)
+                {
+                    infoDisplayTB.AppendText("Current Modified DateTime: " + file.CurrentModifiedDate + "\n");
+                }
+                
+                if (file.EmbeddedFileDate != DateTime.MinValue)
+                {
+                    infoDisplayTB.AppendText("Embedded File Date: " + file.EmbeddedFileDate + "\n");
+                }
             }
-        }
-
-        private void AddFileInfo(string filePath)
-        {
-            // FOR DIRECTORIES PROBABLY. THIS IS USED IF A FILE/DIRECTORY ENDS WITH / Ex. Something/MyDocs/ WILL RETURN MyDocs
-            //string fileName = file.Substring(0, file.LastIndexOf('\\')).Split('\\').Last();
-
-            string fileName = filePath.Split('\\').Last();
-            DateTime modifiedDate = File.GetLastWriteTime(filePath);
-
-            filePreviewInfo.Add("---------------------------------------------------\n"
-                + "File: " + fileName + "\n" + "Current Modified DateTime: " + modifiedDate.ToString() + "\n");
         }
 
         private void PreviewChangeBtn_Click(object sender, EventArgs e)
         {
-            if (filePaths.Count == 0)
+
+            if (fileInfo.Count <= 0)
             {
+                infoDisplayTB.Text = "Please select a file (ctrl+O) or from the dropdown menu first.";
                 return;
             }
 
-            shownFutureChanges = true;
+            infoDisplayTB.Clear();
 
-
+            if (shownFutureChanges == false)
+            {
+                getCurrentModifiedDate();
+                getEmbeddedFileDate();
+                shownFutureChanges = true;
+            }
+            
+            addFileInfoToInfoTB();
         }
-
-        
     }
 }
+
+
+/**
+ * Adds File information to the fileInfo Dictionary. File information includes: File Name,
+ * and Current Modified DateTime
+ * @param filePath - The absolute path for the file.
+*/
+/*
+private void addCurrentFileInfo(string filePath)
+{
+   // FOR DIRECTORIES PROBABLY. THIS IS USED IF A FILE/DIRECTORY ENDS WITH / Ex. Something/MyDocs/ WILL RETURN MyDocs
+   //string fileName = file.Substring(0, file.LastIndexOf('\\')).Split('\\').Last();
+
+   string fileName = filePath.Split('\\').Last();
+   DateTime modifiedDate = File.GetLastWriteTime(filePath);
+   FileInformation fi = new FileInformation();
+
+   fileInfo.Add(fileName, fi);
+}
+*/
+
+//private void addEmbeddedFileDate(string fileName, DateTime embeddedDate)
+//{
+//    /*
+//    if (!fileInfo.Any(file => file.FileName == fileName))
+//    {
+//        MessageBox.Show("Error: fileName not found while trying to write Embedded File Date", "Error",
+//            MessageBoxButtons.OK, MessageBoxIcon.Error);
+//        return;
+//    }
+//    */
+
+//    int index = fileInfo.FindIndex(file => file.FileName == fileName);
+//    if (index == -1)
+//    {
+//        MessageBox.Show("Error: fileName not found while trying to write Embedded File Date", "Error",
+//            MessageBoxButtons.OK, MessageBoxIcon.Error);
+//        return;
+//    }
+
+//    DateTime embeddedDate =
+//}
 
 
 // Read the file backwards, byte by byte using SeekOrigin.Current.
