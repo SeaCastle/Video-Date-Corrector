@@ -28,8 +28,6 @@ namespace VideoDateCorrector
 
             public string FileName
             {
-                //get => fileName;
-                //set => fileName = value;
                 get; set;
             }
 
@@ -65,16 +63,20 @@ namespace VideoDateCorrector
             date = "";
             directoryPath = "";
             fileInfo = new List<FileInformation>();
+
+            updateFileBtn.Enabled = false;
         }
 
         private void openMOVToolStripMenuItem_Click(object sender, EventArgs e)
         {
             getFilesFromFileDialog();
+            updateFileBtn.Enabled = false;
         }
 
         private void BrowseFilesBtn_Click(object sender, EventArgs e)
         {
             getFilesFromFileDialog();
+            updateFileBtn.Enabled = false;
         }
 
         private void getFilesFromFileDialog()
@@ -199,35 +201,27 @@ namespace VideoDateCorrector
             return fileDate;
         }
 
-        private void getEmbeddedFileDate()
-        {
-            byte[] fileChunk = new byte[FILECHUNKSIZE];
+        private void getEmbeddedFileDate(FileInformation file, byte[] fileChunk)
+        {   
             DateTime embeddedFileDate;
 
-            foreach (FileInformation file in fileInfo)
+            getFileChunk(file.FilePath, ref fileChunk);
+            embeddedFileDate = getDateFromFileChunk(ref fileChunk);
+
+            if (embeddedFileDate != DateTime.MinValue)
             {
-
-                getFileChunk(file.FilePath, ref fileChunk);
-                embeddedFileDate = getDateFromFileChunk(ref fileChunk);
-
-                if (embeddedFileDate != DateTime.MinValue)
-                {
-                    //File.SetLastWriteTime(file.FilePath, fileDate);
-                    file.EmbeddedFileDate = embeddedFileDate;
-                }
-                else
-                {
-                    infoDisplayTB.AppendText("Error parsing file. The date in the file does not match \"yyyy-MM-dd HH:mm:ss\" format");
-                }
+                //File.SetLastWriteTime(file.FilePath, fileDate);
+                file.EmbeddedFileDate = embeddedFileDate;
+            }
+            else
+            {
+                infoDisplayTB.AppendText("Error parsing file: " + file.FileName +". The date in the file does not match \"yyyy-MM-dd HH:mm:ss\" format");
             }
         }
 
-        private void getCurrentModifiedDate()
-        {
-            foreach (FileInformation file in fileInfo)
-            {
-                file.CurrentModifiedDate = File.GetLastWriteTime(file.FilePath);
-            }
+        private void getCurrentModifiedDate(FileInformation file)
+        {          
+            file.CurrentModifiedDate = File.GetLastWriteTime(file.FilePath);      
         }
 
         /**
@@ -236,10 +230,6 @@ namespace VideoDateCorrector
          */
         private void addFileInfoToInfoTB()
         {
-            //infoDisplayTB.AppendText("---------------------------------------------------\n");
-            //infoDisplayTB.AppendText("File: " + fileName + "\n");
-            //infoDisplayTB.AppendText("Current Modified DateTime: " + modifiedDate.ToString() + "\n");
-
             foreach (FileInformation file in fileInfo)
             {
                 infoDisplayTB.AppendText("---------------------------------------------------\n");
@@ -268,13 +258,22 @@ namespace VideoDateCorrector
             infoDisplayTB.Clear();
 
             if (shownFutureChanges == false)
-            {
-                getCurrentModifiedDate();
-                getEmbeddedFileDate();
+            {                
+                byte[] fileChunk = new byte[FILECHUNKSIZE];
+
+                foreach (FileInformation file in fileInfo)
+                {
+                    getCurrentModifiedDate(file);
+                    getEmbeddedFileDate(file, fileChunk);
+                }
+                                
                 shownFutureChanges = true;
             }
             
             addFileInfoToInfoTB();
+
+            // User must preview changes before they are allowed to update files.
+            updateFileBtn.Enabled = true;
         }
     }
 }
