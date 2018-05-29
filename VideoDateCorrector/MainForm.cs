@@ -64,7 +64,20 @@ namespace VideoDateCorrector
             directoryPath = "";
             fileInfo = new List<FileInformation>();
 
-            updateFileBtn.Enabled = false;
+            updateFileBtn.Enabled = false;            
+
+            // In case the program is run from dragging files onto the shortcut.
+            string[] arguments = Environment.GetCommandLineArgs();
+            
+            if (arguments.Length > 1)
+            {
+                int size = arguments.Length - 1;
+                string[] files = new string[size];
+                Array.Copy(arguments, 1, files, 0, size);
+                
+                addAllFilesToFileInfo(ref files);
+                addFileInfoToInfoTB();
+            }
         }
 
         private void openMOVToolStripMenuItem_Click(object sender, EventArgs e)
@@ -274,6 +287,35 @@ namespace VideoDateCorrector
 
             // User must preview changes before they are allowed to update files.
             updateFileBtn.Enabled = true;
+        }
+
+        private void addAllFilesToFileInfo(ref string[] files)
+        {
+            foreach (string file in files)
+            {
+                fileInfo.Add(new FileInformation(file));
+            }
+        }
+
+        private void MainForm_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        private void MainForm_DragDrop(object sender, DragEventArgs e)
+        {
+            if (fileInfo.Count > 0)
+            {
+                fileInfo.Clear();
+            }
+
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            addAllFilesToFileInfo(ref files);
+
+            addFileInfoToInfoTB();
         }
     }
 }
